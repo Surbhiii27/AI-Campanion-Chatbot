@@ -5,6 +5,11 @@ from dotenv import load_dotenv
 
 load_dotenv()
 api_key = os.getenv("GROQ_API_KEY")
+if not api_key:
+    try:
+        api_key = st.secrets["GROQ_API_KEY"]
+    except (KeyError, FileNotFoundError):
+        api_key = None
 
 st.set_page_config(page_title="Leo — Forever Yours", page_icon="💖", layout="centered")
 
@@ -69,6 +74,10 @@ if user_input := st.chat_input("Message your boyfriend..."):
     st.session_state.messages.append({"role": "user", "content": user_input})
     with st.chat_message("user", avatar="✨"):
         st.markdown(user_input)
+
+    if not api_key:
+        st.error("Add GROQ_API_KEY in Streamlit Cloud under Manage app > Settings > Secrets.")
+        st.stop()
 
     # Format recent history (clean payload)
     history_payload = []
